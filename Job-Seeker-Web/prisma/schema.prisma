@@ -1,0 +1,99 @@
+datasource db {
+  url      = env("DATABASE_URL")
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum JenisKelamin {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model User {
+  id                        Int                       @id @default(autoincrement())
+  username                  String    
+  password                  String                    @db.VarChar(50)
+  email                     String                    
+  nama_lengkap              String?                   @db.VarChar(50)
+  alamat                    String                    @db.VarChar(255)
+  no_telp                   String
+  jenis_kelamin             String  
+  tanggal_lahir             DateTime?                  @db.Date
+  tanggal_gabung            DateTime?  @default(now()) @db.Date
+  user_education_histories  User_education_history[]  @relation("UserEducation")
+  user_job_histories        User_job_history[]        @relation("UserJob")
+
+}
+
+model User_education_history {
+  id                        Int                       @id @default(autoincrement())
+  pendidikan_terakhir       String
+  tahun_mulai               DateTime
+  tahun_selesai             DateTime
+  nilai                     Float
+  organisasi                String
+  userId                    Int
+  user                      User                      @relation("UserEducation", fields: [userId], references: [id])
+}
+
+model User_job_history {
+  id                        Int                       @id @default(autoincrement())
+  pekerjaan_terdahulu       String
+  perusahaan_terdahulu      String
+  tahun_mulai               DateTime
+  tahun_selesai             DateTime
+  pengalaman_kerja          String
+  keahlian                  String
+  userId                    Int
+  user                      User                      @relation("UserJob", fields: [userId], references: [id])
+}
+
+model Job_category {
+  id                        Int                       @id @default(autoincrement())
+  nama_kategory             String
+  jobId                     Int
+  job                       Job                       @relation("Job_category", fields: [jobId], references: [id])
+}
+
+model Job {
+  id                        Int                       @id @default(autoincrement())
+  posisi_pekerjaan          String
+  deskripsi                 String
+  lokasi                    String
+  gaji                      String
+  jenis_pekerjaan           String
+  tgl_posting               DateTime
+  job_categories            Job_category[]            @relation("Job_category")
+  companyId                 Int
+  company                   Company                   @relation("Company_category", fields: [companyId], references: [id])
+}
+
+model Company {
+  id                        Int                       @id @default(autoincrement())
+  nama_perusahaan           String
+  alamat_perusahaan         String
+  no_telp_perusahaan        String
+  deskripsi                 String
+  website                   String
+  tgl_gabung                DateTime
+  jobs                      Job[]                     @relation("Company_category")
+}
+
+model Admin {
+  id                        Int                       @id @default(autoincrement())
+  username                  String
+  password                  String  
+  email                     String  
+  aplications               Application[]             @relation("Application_admin")
+}
+model Application {
+  id                        Int                        @id @default(autoincrement())
+  tgl_pengajuan             DateTime 
+  status                    String
+  adminId                   Int
+  admin                     Admin                     @relation("Application_admin", fields: [adminId], references: [id])
+}
